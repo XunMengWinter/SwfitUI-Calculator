@@ -62,6 +62,8 @@ struct ContentView: View {
             .background(.calculatorBg)
             .clipShape(.rect(cornerRadius: 12))
             .padding(.bottom)
+            
+            
             // 使用 GeometryReader 使按钮自适应宽高
             GeometryReader { geometry in
                 let buttonWidth = geometry.size.width / CGFloat(
@@ -139,7 +141,7 @@ struct ContentView: View {
             let lastInput: String = String(inputArray.last!)
             if let result = calculateExpression(lastInput){
                 print(result)
-                if result >= Double(Int64.min) && result <= Double(Int64.max), result == Double(Int64(result)) {
+                if result >= Double(Int64.min) && result <= Double(Int64.max) && result == Double(Int64(result)) {
                     resultStr = "\(Int64(result))"
                 } else {
                     var tempStr = ""
@@ -153,6 +155,7 @@ struct ContentView: View {
                         }
                         if occurPot{
                             if "0123456789".contains(c){
+                                // 14280000000
                                 tempPotNum.append(c)
                                 continue
                             }else{
@@ -161,16 +164,18 @@ struct ContentView: View {
                                 if Int(tempPotNum) == 0{
                                     // 无小数部分
                                 }else{
-                                    while tempPotNum.last == "0"{
-                                        tempPotNum.removeLast()
-                                    }
                                     if tempPotNum.count > 10 {
                                         let endIndex = tempPotNum.index(tempPotNum.startIndex, offsetBy: 10)
                                         tempPotNum = String(tempPotNum[..<endIndex])
                                     }
-                                    tempStr.append(".")
-                                    tempStr.append(tempPotNum)
-                                    tempPotNum = ""
+                                    while tempPotNum.last == "0"{
+                                        tempPotNum.removeLast()
+                                    }
+                                    if tempPotNum.count > 0{
+                                        tempStr.append(".")
+                                        tempStr.append(tempPotNum)
+                                        tempPotNum = ""
+                                    }
                                 }
                             }
                         }
@@ -201,10 +206,10 @@ struct ContentView: View {
             if inputStr.count > 0{
                 var tempStr = inputStr
                 var tempNum = ""
+                // 12414 * 123.45
                 while ".0123456789".contains(tempStr.last ?? "c"){
                     tempNum.insert(tempStr.removeLast(), at: tempNum.startIndex)
                 }
-                tempNum.reversed()
                 tempNum = String(Double(tempNum)! / 100.0)
                 inputStr = tempStr + tempNum
             }
@@ -256,6 +261,7 @@ struct ContentView: View {
         var startSqrt = false
         var tempNum = ""
         cleanExpression.append("#")
+        // 123123    √123#       123123*sqrt(123)
         for c in cleanExpression{
             if c == "√"{
                 tempStr.append("sqrt(")
@@ -278,10 +284,9 @@ struct ContentView: View {
             }
         }
         cleanExpression = tempStr
-        
-        cleanExpression = cleanExpression.replacingOccurrences(of: "%", with: "/100")
-        
+                
         print(cleanExpression)
+        // 1.0* 5/2 = 2  2.5
         // Expression: Replace operators accordingly for easier parsing
         let expressionWithBrackets = NSExpression(format: "1.0*" + cleanExpression)
         
@@ -295,4 +300,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .frame(width: 320, height: 520)
 }
